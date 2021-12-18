@@ -9,6 +9,16 @@ namespace BrunoMikoski.AnimationSequencer
     [Serializable]
     public sealed class ScaleDOTweenAction : DOTweenActionBase
     {
+        public ScaleDOTweenAction(Vector3 scale, AxisConstraint axisConstraint)
+        {
+            this.scale = scale;
+            this.axisConstraint = axisConstraint;
+        }
+
+        public ScaleDOTweenAction()
+        {
+        }
+
         public override Type TargetComponentType => typeof(Transform);
         public override string DisplayName => "Scale to Size";
 

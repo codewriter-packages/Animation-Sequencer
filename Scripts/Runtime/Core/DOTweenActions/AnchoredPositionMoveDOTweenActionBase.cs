@@ -17,6 +17,14 @@ namespace BrunoMikoski.AnimationSequencer
         private RectTransform rectTransform;
         private Vector2 previousAnchorPosition;
 
+        protected AnchoredPositionMoveDOTweenActionBase()
+        {
+        }
+
+        protected AnchoredPositionMoveDOTweenActionBase(bool isRelative) : base(isRelative)
+        {
+        }
+
         protected override Tweener GenerateTween_Internal(GameObject target, float duration)
         {
             if (rectTransform == null)

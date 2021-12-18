@@ -1,0 +1,20 @@
+{
+    "name": "BrunoMikoski.AnimationSequencer.Editor.Tests",
+    "rootNamespace": "",
+    "references": [
+        "BrunoMikoski.AnimationSequencer.Editor",
+        "BrunoMikoski.AnimationSequencer",
+        "Unity.EditorCoroutines.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

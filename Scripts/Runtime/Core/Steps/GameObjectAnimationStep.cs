@@ -13,6 +13,26 @@ namespace BrunoMikoski.AnimationSequencer
         [SerializeField]
         protected float duration = 1;
 
+        protected GameObjectAnimationStep()
+        {
+        }
+
+        protected GameObjectAnimationStep(GameObject target)
+        {
+            this.target = target;
+        }
+
+        protected GameObjectAnimationStep(GameObject target, float duration)
+        {
+            this.target = target;
+            this.duration = duration;
+        }
+        
+        protected GameObjectAnimationStep(GameObject target, float duration, float delay) : base(delay)
+        {
+            this.target = target;
+            this.duration = duration;
+        }
         public void SetTarget(GameObject newTarget)
         {
             target = newTarget;

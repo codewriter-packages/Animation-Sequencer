@@ -22,9 +22,19 @@ namespace BrunoMikoski.AnimationSequencer
         [SerializeField]
         protected bool isRelative;
 
+
         public virtual Type TargetComponentType { get; }
         public abstract string DisplayName { get; }
 
+        protected DOTweenActionBase()
+        {
+        }
+        
+        protected DOTweenActionBase(bool isRelative)
+        {
+            this.isRelative = isRelative;
+        }
+        
         protected abstract Tweener GenerateTween_Internal(GameObject target, float duration);
 
         public Tween GenerateTween(GameObject target, float duration)

@@ -14,8 +14,22 @@ namespace BrunoMikoski.AnimationSequencer
         
         [SerializeField]
         private LoopType loopType;
-        [SerializeReference]
-        private DOTweenActionBase[] actions;
+
+        [SerializeReference] 
+        private DOTweenActionBase[] actions = new DOTweenActionBase[0];
+        public DOTweenActionBase[] Actions => actions;
+        
+        public DOTweenAnimationStep(GameObject target) : base(target)
+        {
+        }
+        
+        public DOTweenAnimationStep(GameObject target, float duration) : base(target, duration)
+        {
+        }
+
+        public DOTweenAnimationStep(GameObject target, float duration, float delay) : base(target, duration, delay)
+        {
+        }
 
         public override void AddTweenToSequence(Sequence animationSequence)
         {
@@ -50,6 +64,12 @@ namespace BrunoMikoski.AnimationSequencer
                 targetName = target.name;
             
             return $"{index}. {targetName}: {String.Join(", ", actions.Select(action => action.DisplayName)).Truncate(45)}";
+        }
+
+        public void AddAction(DOTweenActionBase action)
+        {
+            Array.Resize(ref actions, actions.Length + 1);
+            actions[actions.Length - 1] = action;
         }
     }
 }

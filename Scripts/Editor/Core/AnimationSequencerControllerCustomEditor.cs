@@ -91,8 +91,14 @@ namespace BrunoMikoski.AnimationSequencer
         {
             EditorGUI.LabelField(rect, "Animation Steps");
         }
-        
-        private void AddNewAnimationStepOfType(Type targetAnimationType)
+
+
+        public T AddNewAnimationStepOfType<T>() where T : AnimationStepBase
+        {
+            return AddNewAnimationStepOfType(typeof(T)) as T;
+        }
+
+        public AnimationStepBase AddNewAnimationStepOfType(Type targetAnimationType)
         {
             SerializedProperty animationStepsProperty = reorderableList.serializedProperty;
             int targetIndex = animationStepsProperty.arraySize;
@@ -107,6 +113,7 @@ namespace BrunoMikoski.AnimationSequencer
                 targetSerializedProperty.objectReferenceValue = (serializedObject.targetObject as AnimationSequencerController)?.gameObject;
             
             serializedObject.ApplyModifiedProperties();
+            return managedReferenceValue as AnimationStepBase;
         }
         
         private void OnClickToRemove(ReorderableList list)
@@ -349,7 +356,7 @@ namespace BrunoMikoski.AnimationSequencer
                                                       0.01f) * sequencerController.PlayingSequence.Duration());
         }
 
-        private void PlaySequence()
+        public void PlaySequence()
         {
             if (!Application.isPlaying)
             {

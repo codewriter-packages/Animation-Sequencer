@@ -16,6 +16,16 @@ namespace BrunoMikoski.AnimationSequencer
         public FlowType FlowType => flowType;
 
         public abstract string DisplayName { get; }
+
+        
+        protected AnimationStepBase()
+        {
+        }
+        
+        protected AnimationStepBase(float delay)
+        {
+            this.delay = delay;
+        }
         
         public abstract void AddTweenToSequence(Sequence animationSequence);
 

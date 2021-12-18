@@ -23,6 +23,8 @@ namespace BrunoMikoski.AnimationSequencer
 
         [SerializeReference]
         private AnimationStepBase[] animationSteps = new AnimationStepBase[0];
+        public AnimationStepBase[] AnimationSteps => animationSteps;
+
         [SerializeField]
         private UpdateType updateType = UpdateType.Normal;
         [SerializeField]
@@ -314,6 +316,12 @@ namespace BrunoMikoski.AnimationSequencer
             DOTween.Kill(this);
             DOTween.Kill(playingSequence);
             playingSequence = null;
+        }
+
+        public void AddAnimationStep(AnimationStepBase animationStep)
+        {
+            Array.Resize(ref animationSteps, animationSteps.Length + 1);
+            animationSteps[animationSteps.Length - 1] = animationStep;
         }
     }
 }
