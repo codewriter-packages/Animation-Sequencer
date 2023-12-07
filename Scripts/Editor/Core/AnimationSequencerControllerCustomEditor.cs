@@ -39,6 +39,8 @@ namespace BrunoMikoski.AnimationSequencer
         private bool wasShowingStepsPanel;
         private bool justStartPreviewing;
 
+        private (float start, float end)[] previewingTimings;
+
         private void OnEnable()
         {
             sequencerController = target as AnimationSequencerController;
@@ -440,6 +442,9 @@ namespace BrunoMikoski.AnimationSequencer
                     sequencerController.Play();
                     
                     DOTweenEditorPreview.PrepareTweenForPreview(sequencerController.PlayingSequence);
+
+                    if (AnimationSequencerSettings.GetInstance().DrawTimingsWhenPreviewing)
+                        previewingTimings = DoTweenProxy.GetTimings(this.sequencerController.PlayingSequence, this.sequencerController.AnimationSteps);
                 }
                 else
                 {
@@ -572,6 +577,40 @@ namespace BrunoMikoski.AnimationSequencer
 
             if (!element.TryGetTargetObjectOfProperty(out AnimationStepBase animationStepBase))
                 return;
+
+            if (DOTweenEditorPreview.isPreviewing &&
+                this.sequencerController.PlayingSequence != null && this.previewingTimings != null &&
+                index >= 0 && index < this.previewingTimings.Length)
+            {
+                var (start, end) = this.previewingTimings[index];
+
+                var duration = this.sequencerController.PlayingSequence.Duration();
+                var progress = this.GetCurrentSequencerProgress();
+
+                var progressRect = new Rect(rect)
+                {
+                    xMin = Mathf.Lerp(rect.xMin, rect.xMax, start / duration) - 1,
+                    xMax = Mathf.Lerp(rect.xMin, rect.xMax, end / duration) + 1,
+                    height = EditorGUIUtility.singleLineHeight,
+                };
+
+                var markerRect = new Rect(rect)
+                {
+                    xMin = Mathf.Lerp(rect.xMin, rect.xMax, progress) - 1,
+                    xMax = Mathf.Lerp(rect.xMin, rect.xMax, progress) + 1,
+                    height = EditorGUIUtility.singleLineHeight,
+                };
+
+                var oldColor = GUI.color;
+
+                GUI.color = new Color(0f, 0.5f, 0f, 0.45f);
+                GUI.DrawTexture(progressRect, EditorGUIUtility.whiteTexture);
+
+                GUI.color = Color.black;
+                GUI.DrawTexture(markerRect, EditorGUIUtility.whiteTexture);
+
+                GUI.color = oldColor;
+            }
 
             FlowType flowType = (FlowType)flowTypeSerializedProperty.enumValueIndex;
 
