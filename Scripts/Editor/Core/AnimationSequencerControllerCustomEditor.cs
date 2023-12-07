@@ -12,6 +12,9 @@ namespace BrunoMikoski.AnimationSequencer
     [CustomEditor(typeof(AnimationSequencerController), true)]
     public class AnimationSequencerControllerCustomEditor : Editor
     {
+        private static readonly GUIContent CollapseAllAnimationStepsContent = new GUIContent("▸◂", "Collapse all animation steps");
+        private static readonly GUIContent ExpandAllAnimationStepsContent   = new GUIContent("◂▸", "Expand all animation steps");
+
         private ReorderableList reorderableList;
         
         private AnimationSequencerController sequencerController;
@@ -183,7 +186,33 @@ namespace BrunoMikoski.AnimationSequencer
             DrawFoldoutArea("Settings", ref showSettingsPanel, DrawSettings);
             DrawFoldoutArea("Callback", ref showCallbacksPanel, DrawCallbacks);
             DrawFoldoutArea("Preview", ref showPreviewPanel, DrawPreviewControls);
-            DrawFoldoutArea("Steps", ref showStepsPanel, DrawAnimationSteps);
+            DrawFoldoutArea("Steps", ref showStepsPanel, DrawAnimationSteps, DrawAnimationStepsHeader);
+        }
+
+        private void DrawAnimationStepsHeader(Rect rect) {
+            var collapseAllRect = new Rect(rect) {
+                xMin = rect.xMax - 50,
+                xMax = rect.xMax - 25,
+            };
+            
+            var expandAllRect = new Rect(rect) {
+                xMin = rect.xMax - 25,
+                xMax = rect.xMax - 0,
+            };
+
+            if (GUI.Button(collapseAllRect, CollapseAllAnimationStepsContent, EditorStyles.miniButtonLeft)) {
+                SerializedProperty animationStepsProperty = reorderableList.serializedProperty;
+                for (int i = 0; i < animationStepsProperty.arraySize; i++) {
+                    animationStepsProperty.GetArrayElementAtIndex(i).isExpanded = false;
+                }
+            }
+
+            if (GUI.Button(expandAllRect, ExpandAllAnimationStepsContent, EditorStyles.miniButtonRight)) {
+                SerializedProperty animationStepsProperty = reorderableList.serializedProperty;
+                for (int i = 0; i < animationStepsProperty.arraySize; i++) {
+                    animationStepsProperty.GetArrayElementAtIndex(i).isExpanded = true;
+                }
+            }
         }
 
         private void DrawAnimationSteps()
@@ -518,7 +547,7 @@ namespace BrunoMikoski.AnimationSequencer
             GUILayout.FlexibleSpace();
         }
 
-        private void DrawFoldoutArea(string title,ref bool foldout, Action additionalInspectorGUI)
+        private void DrawFoldoutArea(string title,ref bool foldout, Action additionalInspectorGUI, Action<Rect> additionalHeaderGUI = null)
         {
             using (new EditorGUILayout.VerticalScope("FrameBox"))
             {
@@ -529,8 +558,10 @@ namespace BrunoMikoski.AnimationSequencer
                 
                 foldout = EditorGUI.Foldout(rect, foldout, title);
                 
-                if (foldout)
+                if (foldout) {
+                    additionalHeaderGUI?.Invoke(rect);
                     additionalInspectorGUI.Invoke();
+                }
             }
         }
         
