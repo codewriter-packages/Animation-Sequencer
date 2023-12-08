@@ -615,17 +615,9 @@ namespace BrunoMikoski.AnimationSequencer
 
                 AnimationSequencerStyles.InspectorTitlebar.Draw(titlebarRect, false, false, false, false);
             }
-        }
-
-        private void OnDrawAnimationStep(Rect rect, int index, bool isActive, bool isFocused)
-        {
-            SerializedProperty element = reorderableList.serializedProperty.GetArrayElementAtIndex(index);
-            SerializedProperty flowTypeSerializedProperty = element.FindPropertyRelative("flowType");
-
-            if (!element.TryGetTargetObjectOfProperty(out AnimationStepBase animationStepBase))
-                return;
-
-            if (DOTweenEditorPreview.isPreviewing &&
+            
+            if (Event.current.type == EventType.Repaint &&
+                DOTweenEditorPreview.isPreviewing &&
                 this.sequencerController.PlayingSequence != null && this.previewingTimings != null &&
                 index >= 0 && index < this.previewingTimings.Length)
             {
@@ -636,15 +628,15 @@ namespace BrunoMikoski.AnimationSequencer
 
                 var progressRect = new Rect(rect)
                 {
-                    xMin = Mathf.Lerp(rect.xMin, rect.xMax, start / duration) - 1,
-                    xMax = Mathf.Lerp(rect.xMin, rect.xMax, end / duration) + 1,
+                    xMin   = Mathf.Lerp(rect.xMin, rect.xMax, start / duration) - 1,
+                    xMax   = Mathf.Lerp(rect.xMin, rect.xMax, end / duration) + 1,
                     height = EditorGUIUtility.singleLineHeight,
                 };
 
                 var markerRect = new Rect(rect)
                 {
-                    xMin = Mathf.Lerp(rect.xMin, rect.xMax, progress) - 1,
-                    xMax = Mathf.Lerp(rect.xMin, rect.xMax, progress) + 1,
+                    xMin   = Mathf.Lerp(rect.xMin, rect.xMax, progress) - 1,
+                    xMax   = Mathf.Lerp(rect.xMin, rect.xMax, progress) + 1,
                     height = EditorGUIUtility.singleLineHeight,
                 };
 
@@ -658,6 +650,15 @@ namespace BrunoMikoski.AnimationSequencer
 
                 GUI.color = oldColor;
             }
+        }
+
+        private void OnDrawAnimationStep(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            SerializedProperty element = reorderableList.serializedProperty.GetArrayElementAtIndex(index);
+            SerializedProperty flowTypeSerializedProperty = element.FindPropertyRelative("flowType");
+
+            if (!element.TryGetTargetObjectOfProperty(out AnimationStepBase animationStepBase))
+                return;
 
             FlowType flowType = (FlowType)flowTypeSerializedProperty.enumValueIndex;
 
