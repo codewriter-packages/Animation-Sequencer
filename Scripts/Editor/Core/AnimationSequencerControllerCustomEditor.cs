@@ -46,6 +46,7 @@ namespace BrunoMikoski.AnimationSequencer
             sequencerController = target as AnimationSequencerController;
             reorderableList = new ReorderableList(serializedObject, serializedObject.FindProperty("animationSteps"), true, false, true, true);
             reorderableList.drawElementCallback += OnDrawAnimationStep;
+            reorderableList.drawElementBackgroundCallback += OnDrawAnimationStepBackground;
             reorderableList.elementHeightCallback += GetAnimationStepHeight;
             reorderableList.onAddDropdownCallback += OnClickToAddNew;
             reorderableList.onRemoveCallback += OnClickToRemove;
@@ -70,9 +71,15 @@ namespace BrunoMikoski.AnimationSequencer
             return true;
         }
 
+        public override bool UseDefaultMargins()
+        {
+            return false;
+        }
+
         private void OnDisable()
         {
             reorderableList.drawElementCallback -= OnDrawAnimationStep;
+            reorderableList.drawElementBackgroundCallback -= OnDrawAnimationStepBackground;
             reorderableList.elementHeightCallback -= GetAnimationStepHeight;
             reorderableList.onAddDropdownCallback -= OnClickToAddNew;
             reorderableList.onRemoveCallback -= OnClickToRemove;
@@ -185,10 +192,10 @@ namespace BrunoMikoski.AnimationSequencer
                 SetDefaults();
             }
 
-            DrawFoldoutArea("Settings", ref showSettingsPanel, DrawSettings);
-            DrawFoldoutArea("Callback", ref showCallbacksPanel, DrawCallbacks);
             DrawFoldoutArea("Preview", ref showPreviewPanel, DrawPreviewControls);
             DrawFoldoutArea("Steps", ref showStepsPanel, DrawAnimationSteps, DrawAnimationStepsHeader);
+            DrawFoldoutArea("Settings", ref showSettingsPanel, DrawSettings);
+            DrawFoldoutArea("Callback", ref showCallbacksPanel, DrawCallbacks);
         }
 
         private void DrawAnimationStepsHeader(Rect rect) {
@@ -497,8 +504,10 @@ namespace BrunoMikoski.AnimationSequencer
 
             tweenProgress = GetCurrentSequencerProgress();
 
-            EditorGUILayout.LabelField("Progress");
-            tweenProgress = EditorGUILayout.Slider(tweenProgress, 0, 1);
+            var oldLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 70;
+            tweenProgress = EditorGUILayout.Slider("Progress", tweenProgress, 0, 1);
+            EditorGUIUtility.labelWidth = oldLabelWidth;
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -543,9 +552,11 @@ namespace BrunoMikoski.AnimationSequencer
         {
             GUILayout.FlexibleSpace();
             EditorGUI.BeginChangeCheck();
-            
-            EditorGUILayout.LabelField("TimeScale");
-            tweenTimeScale = EditorGUILayout.Slider(tweenTimeScale, 0, 2);
+
+            var oldLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 70;
+            tweenTimeScale = EditorGUILayout.Slider("TimeScale", tweenTimeScale, 0, 2);
+            EditorGUIUtility.labelWidth = oldLabelWidth;
 			
             UpdateSequenceTimeScale();
 
@@ -554,22 +565,58 @@ namespace BrunoMikoski.AnimationSequencer
 
         private void DrawFoldoutArea(string title,ref bool foldout, Action additionalInspectorGUI, Action<Rect> additionalHeaderGUI = null)
         {
-            using (new EditorGUILayout.VerticalScope("FrameBox"))
+            Rect rect = EditorGUILayout.GetControlRect();
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.inspectorDefaultMargins))
             {
-                Rect rect = EditorGUILayout.GetControlRect();
-                rect.x += 10;
-                rect.width -= 10;
-                rect.y -= 4;
-                
-                foldout = EditorGUI.Foldout(rect, foldout, title);
-                
-                if (foldout) {
-                    additionalHeaderGUI?.Invoke(rect);
+                Rect rectWithMargins = new Rect(rect)
+                {
+                    xMin = rect.xMin + EditorStyles.inspectorDefaultMargins.padding.left,
+                    xMax = rect.xMax - EditorStyles.inspectorDefaultMargins.padding.right,
+                };
+
+                Rect foldoutRect = new Rect(rectWithMargins)
+                {
+                    xMax = rectWithMargins.xMax - 100,
+                };
+
+                Rect additionalHeaderRect = new Rect(rectWithMargins)
+                {
+                    yMin = rectWithMargins.yMin + 3,
+                    yMax = rectWithMargins.yMax - 3,
+                };
+
+                if (Event.current.type == EventType.Repaint)
+                {
+                    var hovered = rect.Contains(Event.current.mousePosition);
+                    AnimationSequencerStyles.InspectorTitlebar.Draw(rect, hovered, false, foldout, false);
+                }
+
+                foldout = EditorGUI.Foldout(foldoutRect, foldout, title, true,
+                    AnimationSequencerStyles.TitlebarFoldout);
+
+                if (foldout)
+                {
+                    additionalHeaderGUI?.Invoke(additionalHeaderRect);
                     additionalInspectorGUI.Invoke();
+                    GUILayout.Space(10);
                 }
             }
         }
-        
+
+        private void OnDrawAnimationStepBackground(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            if (Event.current.type == EventType.Repaint)
+            {
+                var titlebarRect = new Rect(rect)
+                {
+                    height = EditorGUIUtility.singleLineHeight,
+                };
+
+                AnimationSequencerStyles.InspectorTitlebar.Draw(titlebarRect, false, false, false, false);
+            }
+        }
+
         private void OnDrawAnimationStep(Rect rect, int index, bool isActive, bool isFocused)
         {
             SerializedProperty element = reorderableList.serializedProperty.GetArrayElementAtIndex(index);
